@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>พยากรณ์อากาศ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+        }
+        h2 {
+            text-align: center;
+        }
+        .forecast {
+            margin-top: 20px;
+        }
+        .forecast-item {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h2>พยากรณ์อากาศ</h2>
+
+<label for="city">กรอกชื่อเมือง: </label>
+<input type="text" id="city" placeholder="เช่น Bangkok">
+<button onclick="getWeather()">ค้นหา</button>
+
+<div class="forecast" id="forecast"></div>
+
+<script>
+    const API_KEY = "a3aeb6210a93b3d4bee88e355dfa930a";
+
+    async function getWeather() {
+        const city = document.getElementById('city').value;
+        if (!city) return alert("กรุณากรอกชื่อเมือง");
+
+        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city},TH&appid=${API_KEY}&units=metric&lang=th`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("ไม่สามารถดึงข้อมูลได้");
+
+            const data = await response.json();
+            const forecastDiv = document.getElementById('forecast');
+            forecastDiv.innerHTML = `<h3>พยากรณ์อากาศสำหรับ ${city}</h3>`;
+            forecastDiv.innerHTML += `<p>อัปเดตล่าสุด: ${new Date().toLocaleString('th-TH')}</p>`;
+
+            // แสดง 12 ช่วงเวลาแรก
+            data.list.slice(0, 12).forEach(item => {
+                const thaiTime = new Date(item.dt * 1000).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', hour12: false });
+                const temp = item.main.temp;
+                const desc = item.weather[0].description;
+
+                forecastDiv.innerHTML += `
+                    <div class="forecast-item">
+                        เวลา: ${thaiTime} | อุณหภูมิ: ${temp}°C | สภาพอากาศ: ${desc}
+                    </div>
+                `;
+            });
+
+        } catch (error) {
+            alert("ไม่สามารถดึงข้อมูลได้ ตรวจสอบชื่อเมืองอีกครั้ง");
+            console.error(error);
+        }
+    }
+</script>
+
+</body>
+</html>
